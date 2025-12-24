@@ -1,5 +1,4 @@
 class Atom:
-    """Atome minimal avec quelques garde-fous."""
 
     def __init__(self, name, symbol, atomic_number, valence):
         if atomic_number <= 0:
@@ -16,12 +15,11 @@ class Atom:
 
 
 class Molecule:
-    """Version simple : liste d'atomes + liaisons non orientées."""
 
     def __init__(self, name, atoms=None, connections=None):
         self.name = name
         self.atoms = []
-        self.connections = []  # liste de tuples (atom1, atom2) triés pour éviter les doublons
+        self.connections = []  
 
         atoms = atoms or []
         for atom in atoms:
@@ -82,6 +80,23 @@ class Molecule:
             raise ValueError(f"Atome introuvable: {atom}")
         self.connections = [c for c in self.connections if atom not in c]
         self.atoms.remove(atom)
-
+    
+    def get_atoms_with_free_valence(self):
+        return [atom for atom in self.atoms if self.get_valence_restant(atom) > 0]
+    
+    def get_possible_connections(self):
+        possible = []
+        atoms_with_valence = self.get_atoms_with_free_valence()
+        for i, atom1 in enumerate(atoms_with_valence):
+            for atom2 in atoms_with_valence[i+1:]:
+                link = self._normalize(atom1, atom2)
+                if link not in self.connections:
+                    possible.append((atom1, atom2))
+        return possible
+    
+    def is_complete(self):
+        """Vérifie si la molécule est complète (toutes valences saturées)."""
+        return all(self.get_valence_restant(atom) == 0 for atom in self.atoms)
+    
     def __str__(self):
         return f"{self.name} (atoms={self.atoms}) connections={self.connections}"
