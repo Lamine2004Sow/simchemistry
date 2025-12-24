@@ -48,7 +48,12 @@ class Molecule:
         return f"{self.name} ({self.atoms}) {self.connections}"
 
     def add_atom(self, atom):
-        self.atoms.append(atom)
+        try:
+            self.atoms.append(atom)
+        except ValueError:
+            raise ValueError(f"Atom {atom} already exists")
+        except Exception as e:
+            raise ValueError(f"Error adding atom {atom}: {e}")
     
     def add_connection(self, atom1, atom2):
         try:
